@@ -8,6 +8,7 @@ ctf-hard-box/docs/SOLUTION.md
 .env.local
 *.key
 *.pem
+**/.internal/
 
 # === Regenerable build output ===
 **/dist/

@@ -1,0 +1,59 @@
+# CTFd for Operation ShadowLedger - separate stack from the challenge containers.
+# Usage (on the VM):
+#   cd ~/shadowledger/ctfd
+#   echo "SECRET_KEY=$(openssl rand -hex 32)" > .env
+#   echo "DB_PASSWORD=$(openssl rand -hex 16)" >> .env
+#   sudo docker compose up -d
+# Then browse to http://<vm-ip>:8000 and finish the setup wizard.
+services:
+  ctfd:
+    image: ctfd/ctfd:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - "SECRET_KEY=${SECRET_KEY:?set SECRET_KEY in .env}"
+      - "DATABASE_URL=mysql+pymysql://ctfd:${DB_PASSWORD:?set DB_PASSWORD in .env}@db/ctfd"
+      - REDIS_URL=redis://cache:6379
+      - WORKERS=1
+      - REVERSE_PROXY=false
+    volumes:
+      - ctfd_uploads:/var/uploads
+      - ctfd_logs:/var/log/CTFd
+    depends_on:
+      - db
+      - cache
+    networks:
+      - ctfd_net
+
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_USER=ctfd
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=ctfd
+      - MARIADB_AUTO_UPGRADE=1
+    volumes:
+      - ctfd_db:/var/lib/mysql
+    networks:
+      - ctfd_net
+    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - ctfd_redis:/data
+    networks:
+      - ctfd_net
+
+networks:
+  ctfd_net:
+
+volumes:
+  ctfd_uploads:
+  ctfd_logs:
+  ctfd_db:
+  ctfd_redis:
