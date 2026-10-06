@@ -1,0 +1,24 @@
+# === Answer keys / solutions — NEVER commit (spoils the CTF) ===
+**/SOLUTION.txt
+admin_only/
+ctf-hard-box/docs/SOLUTION.md
+
+# === Secrets ===
+.env
+.env.local
+*.key
+*.pem
+
+# === Regenerable build output ===
+**/dist/
+player_deliverables/
+**/__pycache__/
+*.pyc
+
+# === OS / editor noise ===
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
